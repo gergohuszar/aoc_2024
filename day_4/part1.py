@@ -19,16 +19,23 @@ MAMMMXMMMM
 MXMXAXMASX"""
 
 
+matrix_dimension = 140
+
 searched = ["XMAS", "SAMX"]
 matrix = array([list(row) for row in input_str.split("\n")])
 print(matrix)
 
+
 verticals = ["".join(matrix[:, i]) for i in range(matrix.shape[1])]
 horizontals = ["".join(matrix[i, :]) for i in range(matrix.shape[0])]
-diagonals_r_u = ["".join(matrix.diagonal(i)) for i in range(0, 10)]
-diagonals_r_d = ["".join(matrix.diagonal(i)) for i in range(-1, -10, -1)]
-diagonals_l_u = ["".join(fliplr(matrix).diagonal(i)) for i in range(0, 10)]
-diagonals_l_d = ["".join(fliplr(matrix).diagonal(i)) for i in range(-1, -10, -1)]
+diagonals_r_u = ["".join(matrix.diagonal(i)) for i in range(0, matrix_dimension)]
+diagonals_r_d = ["".join(matrix.diagonal(i)) for i in range(-1, -matrix_dimension, -1)]
+diagonals_l_u = [
+    "".join(fliplr(matrix).diagonal(i)) for i in range(0, matrix_dimension)
+]
+diagonals_l_d = [
+    "".join(fliplr(matrix).diagonal(i)) for i in range(-1, -matrix_dimension, -1)
+]
 
 
 inputs = [
@@ -40,6 +47,7 @@ inputs = [
     diagonals_l_d,
 ]
 
+print(inputs)
 
 result = 0
 

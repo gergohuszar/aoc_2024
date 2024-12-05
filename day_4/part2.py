@@ -1,51 +1,37 @@
-def count_xmas(grid):
-    # Define dimensions
-    rows = len(grid)
-    cols = len(grid[0])
-
-    # Word to search
-    word = "XMAS"
-    word_len = len(word)
-
-    # All 8 possible directions (row_step, col_step)
-    directions = [
-        (0, 1),  # right
-        (0, -1),  # left
-        (1, 0),  # down
-        (-1, 0),  # up
-        (1, 1),  # down-right
-        (-1, -1),  # up-left
-        (1, -1),  # down-left
-        (-1, 1),  # up-right
-    ]
-
-    def is_valid(r, c):
-        return 0 <= r < rows and 0 <= c < cols
-
-    def check_direction(r, c, dr, dc):
-        for i in range(word_len):
-            nr, nc = r + i * dr, c + i * dc
-            if not is_valid(nr, nc) or grid[nr][nc] != word[i]:
-                return False
-        return True
-
-    # Count occurrences
-    count = 0
-    for r in range(rows):
-        for c in range(cols):
-            for dr, dc in directions:
-                if check_direction(r, c, dr, dc):
-                    count += 1
-
-    return count
+from numpy import array, fliplr
 
 
-# Example usage with your sample grid:
 with open("input.txt") as f:
     input_str = f.read()
 
-# Convert the grid to a list of lists
-grid = [row for row in input_str.split("\n")]
 
-# Count the occurrences of "XMAS"
-print("Total XMAS occurrences:", count_xmas(grid))
+test_res = 9
+
+test_input = """.M.S......
+..A..MSMS.
+.M.S.MAA..
+..A.ASMSM.
+.M.S.M....
+..........
+S.S.S.S.S.
+.A.A.A.A..
+M.M.M.M.M.
+.........."""
+
+
+searched = ["MAS", "SAM"]
+matrix = array([list(row) for row in input_str.split("\n")])
+
+count = 0
+for row_i in range(matrix.shape[0]):
+    for col_i in range(matrix.shape[1]):
+        submatrix = matrix[row_i : row_i + 3, col_i : col_i + 3]
+
+        diagonal_str = "".join(submatrix.diagonal())
+        other_diagonal_str = "".join(fliplr(submatrix).diagonal())
+
+        if diagonal_str in searched and other_diagonal_str in searched:
+            count += 1
+
+
+print(count)
