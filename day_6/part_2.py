@@ -3,10 +3,13 @@ import numpy as np
 
 
 class Player:
-    def __init__(self, x: int, y: int, map):
+    def __init__(self, x: int, y: int, map, dir):
         self.x = x
         self.y = y
-        self.cur_dir = "up"
+        self.first_x = x
+        self.first_y = y
+        self.first_dir = dir
+        self.cur_dir = dir
         self.visited = set()
         self.map = map
         self.max_x, self.max_y = map.shape
@@ -23,17 +26,23 @@ class Player:
         else:
             raise ValueError(f"Invalid direction: {self.cur_dir}")
 
-    def give_new_dir(self):
-        if self.cur_dir == "up":
-            self.cur_dir = "right"
-        elif self.cur_dir == "right":
-            self.cur_dir = "down"
-        elif self.cur_dir == "down":
-            self.cur_dir = "left"
-        elif self.cur_dir == "left":
-            self.cur_dir = "up"
+    def state(self):
+        return (self.x, self.y, self.cur_dir)
+
+    def next_dir(dir):
+        if dir == "up":
+            return "right"
+        elif dir == "right":
+            return "down"
+        elif dir == "down":
+            return "left"
+        elif dir == "left":
+            return "up"
         else:
-            raise ValueError(f"Invalid direction: {self.cur_dir}")
+            raise ValueError(f"Invalid direction: {dir}")
+
+    def give_new_dir(self):
+        self.cur_dir = Player.next_dir(self.cur_dir)
 
     def calc_next_direction(
         self,
@@ -48,7 +57,8 @@ class Player:
             new_pos = (self.x, self.y - 1)
         else:
             raise ValueError(f"Invalid direction: {self.cur_dir}")
-        if self.is_in_bounds(*new_pos):
+
+        if self.is_in_bounds(new_pos[0], new_pos[1]):
             char = self.map[new_pos]
 
             if char == "#":
@@ -57,15 +67,40 @@ class Player:
     def is_in_bounds(self, x, y) -> bool:
         return 0 <= x < self.max_x and 0 <= y < self.max_y
 
-    def cur_char(self) -> bool:
-        return self.map[self.x][self.y]
-
     def save_visited(self):
         while self.is_in_bounds(self.x, self.y):
             self.visited.add((self.x, self.y))
 
             self.calc_next_direction()
             self.move()
+
+    def player_reset(self):
+        self.x = self.first_x
+        self.y = self.first_y
+        self.cur_dir = self.first_dir
+
+
+def is_loop(x, y, player):
+    if player.map[x][y] == "#":
+        return False
+    player.map[x][y] = "#"
+
+    states = set()
+
+    while player.is_in_bounds(player.x, player.y):
+        state = player.state()
+
+        if state in states:
+            player.map[x][y] = "."
+            return True
+
+        states.add(state)
+
+        player.calc_next_direction()
+        player.move()
+
+    player.map[x][y] = "."
+    return False
 
 
 def solution(input: str) -> int:
@@ -76,16 +111,30 @@ def solution(input: str) -> int:
     player_pos_x, player_pos_y = np.where(matrix == "^")
     player_pos_x, player_pos_y = int(player_pos_x[0]), int(player_pos_y[0])
 
-    player = Player(player_pos_x, player_pos_y, matrix)
+    player = Player(player_pos_x, player_pos_y, matrix, "up")
+
+    count = 0
 
     player.save_visited()
 
-    print(len(player.visited))
+    player.player_reset()
 
-    return len(player.visited)
+    for i, cordinates in enumerate(player.visited):
+        x, y = cordinates
+
+        loop = is_loop(x, y, player)
+        player.player_reset()
+        if loop:
+            count += 1
+
+    print(count)
+    return count
 
 
 if __name__ == "__main__":
+    np.set_printoptions(threshold=np.inf, linewidth=np.inf)
     with open("input.txt") as f:
         input_str = f.read()
-        print(solution(input_str))
+        solution(input_str)
+
+

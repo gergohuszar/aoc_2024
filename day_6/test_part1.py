@@ -1,8 +1,10 @@
-from part_1 import solution
+from part_2 import solution
 
 
 def test_part1():
-    test_res = 41
+    test_res = 6
+
+    # 2008 is the solution
 
     test_input = """....#.....
 .........#
