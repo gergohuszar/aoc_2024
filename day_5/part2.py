@@ -1,3 +1,6 @@
+import time
+
+
 def is_rule_applicable(a: int, b: int, update: list[int]) -> bool:
     return a in update and b in update
 
@@ -6,19 +9,16 @@ def is_update_satisfy_rule(a: int, b: int, update: list[int]) -> bool:
     return update.index(a) < update.index(b)
 
 
-def fix_order_according_rule(a: int, b: int, update: list[int]) -> list[int]:
-    a_index = update.index(a)
-    b_index = update.index(b)
-
-    if a_index < b_index:
-        return update
-
-    update[a_index], update[b_index] = update[b_index], update[a_index]
-
-    return update
+def is_one_rule_not_satisfied(rules, update: list[int]) -> bool:
+    for rule in rules:
+        a, b = rule
+        if not is_update_satisfy_rule(a, b, update):
+            return True
+    return False
 
 
 def solution(input: str) -> int:
+    collect_lists = time.time()
     input_list: list[str] = input.splitlines()
 
     last_ordering_rules_index = input_list.index("")
@@ -31,23 +31,42 @@ def solution(input: str) -> int:
     collected_page_numbers = []
 
     page_numbers_of_update = input_list[last_ordering_rules_index + 1 :]
+    # measure runtime
+    collect_lists_end = time.time()
 
     for update in page_numbers_of_update:
         a = update.split(",")
         update_int: list[int] = list(map(int, a))
 
-        for rule in ordering_rules:
-            x, y = rule
+        wrong_order = False
 
-            if is_rule_applicable(x, y, update_int):
-                x_index = update.index(x)
-                y_index = update.index(y)
+        applicable_rules = [
+            rule
+            for rule in ordering_rules
+            if is_rule_applicable(rule[0], rule[1], update_int)
+        ]
+        wrong_order = False
+        rule_not_satisfied = True
+
+        while rule_not_satisfied:
+            for rule in applicable_rules:
+                a, b = rule
+
+                x_index = update_int.index(a)
+                y_index = update_int.index(b)
 
                 if x_index > y_index:
-                    update[a_index], update[b_index] = update[b_index], update[a_index]
+                    wrong_order = True
+                    popped = update_int.pop(x_index)
+                    update_int.insert(y_index, popped)
 
-        else:
+            rule_not_satisfied = is_one_rule_not_satisfied(applicable_rules, update_int)
+
+        if wrong_order:
             collected_page_numbers.append(update_int[len(update_int) // 2])
+    end = time.time()
+
+    print("Time: ", collect_lists_end-collect_lists)
 
     return sum(collected_page_numbers)
 

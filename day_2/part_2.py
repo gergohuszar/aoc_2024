@@ -4,11 +4,7 @@
 
 
 def list_check(report):
-    """
-    Check if the report is safe according to the rules:
-    - All levels are either increasing or decreasing.
-    - Any two adjacent levels differ by at least 1 and at most 3.
-    """
+    
     differences = [report[i + 1] - report[i] for i in range(len(report) - 1)]
     increasing = all(1 <= diff <= 3 for diff in differences)
     decreasing = all(-3 <= diff <= -1 for diff in differences)
