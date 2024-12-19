@@ -15,6 +15,10 @@ class Player:
         self.max_x, self.max_y = map.shape
 
     def move(self):
+        if self.check_if_front_is_wall():
+            self.give_new_dir()
+            return
+
         if self.cur_dir == "up":
             self.x -= 1
         elif self.cur_dir == "right":
@@ -28,6 +32,21 @@ class Player:
 
     def state(self):
         return (self.x, self.y, self.cur_dir)
+
+    def check_if_front_is_wall(self):
+        if self.cur_dir == "up":
+            new_pos = (self.x - 1, self.y)
+        elif self.cur_dir == "right":
+            new_pos = (self.x, self.y + 1)
+        elif self.cur_dir == "down":
+            new_pos = (self.x + 1, self.y)
+        elif self.cur_dir == "left":
+            new_pos = (self.x, self.y - 1)
+        else:
+            raise ValueError(f"Invalid direction: {self.cur_dir}")
+
+        if self.is_in_bounds(*new_pos):
+            return self.map[new_pos] == "#"
 
     def next_dir(dir):
         if dir == "up":
@@ -44,26 +63,6 @@ class Player:
     def give_new_dir(self):
         self.cur_dir = Player.next_dir(self.cur_dir)
 
-    def calc_next_direction(
-        self,
-    ) -> str:
-        if self.cur_dir == "up":
-            new_pos = (self.x - 1, self.y)
-        elif self.cur_dir == "right":
-            new_pos = (self.x, self.y + 1)
-        elif self.cur_dir == "down":
-            new_pos = (self.x + 1, self.y)
-        elif self.cur_dir == "left":
-            new_pos = (self.x, self.y - 1)
-        else:
-            raise ValueError(f"Invalid direction: {self.cur_dir}")
-
-        if self.is_in_bounds(new_pos[0], new_pos[1]):
-            char = self.map[new_pos]
-
-            if char == "#":
-                self.give_new_dir()
-
     def is_in_bounds(self, x, y) -> bool:
         return 0 <= x < self.max_x and 0 <= y < self.max_y
 
@@ -71,7 +70,6 @@ class Player:
         while self.is_in_bounds(self.x, self.y):
             self.visited.add((self.x, self.y))
 
-            self.calc_next_direction()
             self.move()
 
     def player_reset(self):
@@ -96,7 +94,6 @@ def is_loop(x, y, player):
 
         states.add(state)
 
-        player.calc_next_direction()
         player.move()
 
     player.map[x][y] = "."
@@ -135,6 +132,5 @@ if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf, linewidth=np.inf)
     with open("input.txt") as f:
         input_str = f.read()
+
         solution(input_str)
-
-
